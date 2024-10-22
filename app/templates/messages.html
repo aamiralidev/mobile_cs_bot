@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .conversation {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .phone-number {
+            font-weight: bold;
+        }
+        .message {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Incoming Messages</h1>
+    <div id="conversations">
+        {% for conversation in conversations %}
+        <div class="conversation">
+            <div class="phone-number">From: {{ conversation.phone_number }}</div>
+            <div class="messages">
+                {% for msg in conversation.messages %}
+                    <div class="message">
+                        <strong>{{ msg.role }}:</strong> {{ msg.content }}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

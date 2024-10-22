@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chatbot Interface</title>
+    <style>
+        #phoneNumberContainer {
+            margin-bottom: 20px;
+        }
+        #chatbox {
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 300px;
+            overflow-y: scroll;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Chatbot Interface</h1>
+    <div id="phoneNumberContainer">
+        <input type="text" id="phoneNumber" placeholder="Enter your phone number...">
+        <button id="savePhoneButton">Save Phone Number</button>
+    </div>
+    <div id="chatbox">
+        <!-- Chat messages will be added here. -->
+        <p><b>assistant:</b> Hello, this is Dan Burns with Dependable We Clean Windows, Pressure Wash, Clear Gutters, install gutter guards, clean roofs, clean fixtures and fans. What services interest you?</p>
+    </div>
+
+    <input type="text" id="inputMessage" placeholder="Type your message here..." disabled>
+    <button id="sendButton" disabled>Send</button>
+
+    <script>
+        let userPhoneNumber = '';
+
+        document.getElementById('savePhoneButton').addEventListener('click', function() {
+            userPhoneNumber = document.getElementById('phoneNumber').value.trim();
+
+            if (userPhoneNumber) {
+                document.getElementById('phoneNumber').disabled = true;
+                document.getElementById('savePhoneButton').disabled = true;
+                document.getElementById('inputMessage').disabled = false;
+                document.getElementById('sendButton').disabled = false;
+            } else {
+                alert('Please enter a valid phone number.');
+            }
+        });
+
+        async function sendMessage(user_input) {
+            const formData = new FormData();
+            formData.append('body', user_input);
+            formData.append('from', userPhoneNumber);
+
+            const response = await fetch('http://localhost:9000/recieve_message', {
+                method: 'POST',
+                body: formData
+            });
+
+            return await response.json();
+        }
+
+        document.getElementById('sendButton').addEventListener('click', function() {
+            let message = document.getElementById('inputMessage').value;
+
+            // Check if message is empty or just whitespace
+            if (!message.trim()) {
+                return; // Exit the function if the message is empty
+            }
+
+            document.getElementById('chatbox').innerHTML += `<p><b>User:</b> ${message}</p>`;
+            sendMessage(message).then(data => {
+                document.getElementById('chatbox').innerHTML += `<p><b>${data.role}:</b> ${data.content}</p>`;
+            });
+            document.getElementById('inputMessage').value = '';
+        });
+    </script>
+</body>
+</html>

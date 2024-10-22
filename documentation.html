@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Documentation: /receive/sms Endpoint</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f7f9fc;
+            color: #333;
+        }
+        h1, h2, h3 {
+            color: #0056b3;
+        }
+        h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        h2 {
+            font-size: 1.75em;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        h3 {
+            font-size: 1.5em;
+            margin-top: 15px;
+            margin-bottom: 10px;
+        }
+        p {
+            margin-bottom: 15px;
+        }
+        ul, ol {
+            margin-bottom: 15px;
+        }
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: Consolas, monospace;
+            color: #333;
+        }
+        pre {
+            background-color: #f5f5f5;
+            color: #333;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: Consolas, monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .note {
+            background-color: #e7f3fe;
+            border-left: 4px solid #2196F3;
+            padding: 10px;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+        .section-title {
+            border-bottom: 2px solid #0056b3;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 0.9em;
+            text-align: center;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>API Documentation: <code>/receive/sms</code> Endpoint</h1>
+
+        <h2 class="section-title">Overview</h2>
+        <p>The <code>/receive/sms</code> endpoint is designed to handle incoming SMS messages or the messages from the website and respond dynamically based on the content of the message. This endpoint integrates with a webpage to process text messages and generate automated replies using stored conversation data and AI-driven responses.</p>
+
+        <h2 class="section-title">Endpoint</h2>
+        <ul>
+            <li><strong>URL:</strong> <code>/receive/sms</code></li>
+            <li><strong>Method:</strong> <code>POST</code></li>
+        </ul>
+
+        <h2 class="section-title">Request Parameters</h2>
+        <p>The endpoint expects a <code>POST</code> request with the following form-encoded parameters:</p>
+        <ul>
+            <li><strong>Body</strong> : A string containing the text of the incoming SMS message.</li>
+            <li><strong>From</strong> : A string containing the phone number or a unique key from frontend from which the SMS message was sent.</li>
+        </ul>
+
+        <h2 class="section-title">Response</h2>
+        <p>The endpoint returns a response in XML format, which is compatible with Twilio's TwiML format for SMS responses also with the webpages.</p>
+        <ul>
+            <li><strong>Success Response:</strong></li>
+        </ul>
+        <pre class="code-block">&lt;Response&gt;
+    &lt;Message&gt;Your generated reply goes here.&lt;/Message&gt;
+&lt;/Response&gt;</pre>
+        <ul>
+            <li><strong>Error Responses:</strong></li>
+        </ul>
+        <p>In case of an invalid request (missing <code>Body</code> or <code>From</code>), the endpoint returns a JSON error message.</p>
+        <pre class="code-block">{ "error": "Invalid request" }</pre>
+        <p>If an error occurs during the message processing, a JSON error message is returned.</p>
+        <pre class="code-block">{ "error": "An error occurred while processing the message" }</pre>
+
+        <h2 class="section-title">Request Samples</h2>
+
+        <h3>JavaScript (Fetch API)</h3>
+        <p>You can use the Fetch API to send a POST request to the endpoint as follows:</p>
+        <pre class="code-block">
+        <code>
+        const url = '/receive/sms';
+        const data = new URLSearchParams();
+        data.append('Body', 'Hello, this is a test message');
+        data.append('From', '+1234567890');
+
+        fetch(url, {
+            method: 'POST',
+            body: data,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        })
+        .then(response => response.text())
+        .then(data => console.log(data))
+        .catch(error => console.error('Error:', error));
+        </code>
+        </pre>
+
+        <h3>cURL</h3>
+        <p>Alternatively, you can use the following cURL command to send a request to the endpoint:</p>
+        <pre class="code-block">
+        <code>
+        curl -X POST /receive/sms \
+        -H "Content-Type: application/x-www-form-urlencoded" \
+        -d "Body=Hello, this is a test message" \
+        -d "From=+1234567890"
+        </code>
+        </pre>
+
+        <h2 class="section-title">Behavior</h2>
+        <ol>
+            <li><strong>Initial Message Handling:</strong>
+                <p>If this is the first message from the phone number (<code>From</code>), a new conversation is created and the initial prompt is appended along with the user's message.</p>
+                <p>If a conversation already exists, the message is appended to the existing conversation.</p>
+            </li>
+            <li><strong>Conversation Storage:</strong>
+                <p>Conversations are stored in a database, with each message being saved and categorized by role (<code>user</code> or <code>bot</code>).</p>
+            </li>
+            <li><strong>AI-Driven Response:</strong>
+                <p>The system generates a response based on the conversation history using an AI-driven model.</p>
+                <p>The bot's reply is appended to the conversation and saved in the database.</p>
+            </li>
+            <li><strong>Twilio Response:</strong>
+                <p>The generated reply is wrapped in a TwiML response and returned as an XML document.</p>
+            </li>
+        </ol>
+
+
+
+
+    </div>
+</body>
+</html>

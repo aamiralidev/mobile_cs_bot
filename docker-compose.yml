@@ -1,0 +1,55 @@
+version: '3.10.11'
+services:
+  web:
+    build: .
+    ports:
+      - "9000:9000"
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    container_name: eight-cross-eight
+    depends_on:
+      - db
+
+  db:
+    image: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_USER}
+    ports:
+      - "5432:5432"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: dan@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: dan
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+  
+  frontend:
+    build:
+      context: ./frontend # Dockerfile for Next.js is in the 'frontend' directory
+      target: dev
+    restart: always
+    command: npm run dev
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+    volumes:
+      - ./frontend:/app
+      - /frontend/app/node_modules
+      - /frontend/app/.next
+    ports:
+      - "3000:3000"  # Expose Next.js on port 3000
+
+
+volumes:
+  postgres_data:

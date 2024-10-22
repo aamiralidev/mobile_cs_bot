@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contacts List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            text-align: center;
+            width: 100%; /* Center the title */
+        }
+        .container {
+            display: flex; /* Use flexbox for layout */
+            height: calc(100vh - 60px); /* Make sure it takes full height minus title */
+        }
+        .contacts {
+            flex: 1; /* Allow the contacts list to take up space */
+            border-right: 1px solid #ccc; /* Add a border to separate */
+            padding-right: 20px; /* Add some space between contacts and chat */
+            max-width: 300px; /* Set a max width for the contacts list */
+            overflow-y: auto; /* Allow scrolling if contacts exceed viewport height */
+        }
+        .contact {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            cursor: pointer; /* Change cursor to indicate clickable */
+        }
+        .phone-number {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: blue; /* Make the link blue */
+        }
+        .latest-message {
+            color: #555;
+        }
+        .chat {
+            flex: 2; /* Allow the chat to take up more space */
+            padding-left: 20px; /* Add some space on the left side */
+        }
+        #messages-display {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            padding: 15px;
+            border-radius: 5px;
+            display: none; /* Hide initially */
+            height: 100%; /* Make messages display take full height */
+            overflow-y: auto; /* Allow scrolling if messages exceed viewport height */
+        }
+    </style>
+</head>
+<body>
+    <h1>Contacts List</h1>
+    <div class="container">
+        <div class="contacts" id="contacts-list">
+            {% for conversation in conversations %}
+            <div class="contact" onclick="fetchMessages('{{ conversation.phone_number }}')">
+                <div class="phone-number">From: {{ conversation.phone_number }}</div>
+                <div class="latest-message">
+                    Latest Message: {{ conversation.message.content }} 
+                    <small>({{ conversation.message.role }})</small>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="chat">
+            <div id="messages-display">
+                <h2>Messages</h2>
+                <div id="messages-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function fetchMessages(contactNumber) {
+            fetch('/messages-by-contact', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ contact_number: contactNumber })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Contact not found');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const messagesContent = document.getElementById('messages-content');
+                messagesContent.innerHTML = ''; // Clear previous messages
+                data.messages.forEach(msg => {
+                    messagesContent.innerHTML += `<div><strong>${msg.role}:</strong> ${msg.content}</div>`;
+                });
+                document.getElementById('messages-display').style.display = 'block'; // Show messages display
+            })
+            .catch(error => {
+                console.error('Error fetching messages:', error);
+                alert('Failed to load messages. Please try again.');
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+__pycache__
+**/__pycache__/
+venv
+.vscode
+__pycache__
+.env
+app/__pycache__
+app/routers/__pycache__
+app/internal/__pycache__
+test
+app/dependencies/__pycache__
+app/routers/__pycache__
+Dan-2.pem
+key_pair.txt
+test.ipynb
+random.txt
+vvv
